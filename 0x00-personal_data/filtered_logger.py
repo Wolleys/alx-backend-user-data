@@ -14,21 +14,6 @@ patterns = {
 PII_FIELDS = ("name", "email", "phone", "ssn", "password")
 
 
-def asc_time() -> str:
-    """Returns the current time.
-    """
-    cur_time = datetime.now()
-    cur_time_ms = cur_time.microsecond // 1000
-    return str('{},{}'.format(cur_time.strftime("%F %X"), cur_time_ms))
-
-
-def get_values(record: logging.LogRecord, msg: str) -> Tuple[str]:
-    """Retrieves values to be printed for a log record.
-    """
-    asctime = asc_time()
-    return (record.name, record.levelname, asctime, msg.replace(';', '; '))
-
-
 def filter_datum(
         fields: List[str], redaction: str, message: str, separator: str,
         ) -> str:
@@ -41,11 +26,12 @@ def filter_datum(
 def get_logger() -> logging.Logger:
     """Creates a new logger for user data.
     """
-    logger = logging.Logger("user_data", logging.INFO)
+    logger = logging.getLogger("user_data")
     stream_handler = logging.StreamHandler()
-    stream_handler.formatter = RedactingFormatter(PII_FIELDS)
-    logger.addHandler(stream_handler)
+    stream_handler.setFormatter(RedactingFormatter(PII_FIELDS))
+    logger.setLevel(logging.INFO)
     logger.propagate = False
+    logger.addHandler(stream_handler)
     return logger
 
 
@@ -65,7 +51,6 @@ class RedactingFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         """formats a LogRecord.
         """
-        tmp = record.getMessage()
-        msg = filter_datum(self.fields, self.REDACTION, tmp, self.SEPARATOR)
-        values = get_values(record, msg)
-        return self.FORMAT % dict(zip(self.FORMAT_FIELDS, values))
+        msg = super(RedactingFormatter, self).format(record)
+        txt = filter_datum(self.fields, self.REDACTION, msg, self.SEPARATOR)
+        return txt
