@@ -27,6 +27,7 @@ class User(Base):
     @password.setter
     def password(self, pwd: str):
         """Setter of a new password: encrypt in SHA256.
+
         WARNING: Use a better password hashing algorithm like argon2
         or bcrypt in real-world projects.
         """
