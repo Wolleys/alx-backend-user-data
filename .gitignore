@@ -1,5 +1,9 @@
 # Ignore all main files
 *main.py
 main_*.py
+
+# Except the ones in:
+!0x03-user_authentication_service/main.py
+
 # Byte-compiled
 __pycache__/
